@@ -1,0 +1,52 @@
+# python partC/verify_ray.py --autoscale   (2026-11-06 14:17, Ray 2.60.0)
+== deploy build(weight=0.2) on ray.init(num_cpus=2)
+deployments and replica states:
+  EtaModelV1   {'RUNNING': 2}
+  EtaModelV2   {'RUNNING': 1}
+  Router       {'RUNNING': 1}
+Ray CPUs: 2, booked by Serve now: 0.85 (worst case with 3 candidate replicas: 2*0.25 + 3*0.25 + 0.1 = 1.35)
+
+== (a) share of 1000 distinct customers routed to the candidate
+v2 share = 0.203 (203 of 1000), target 0.20 +/- 0.04
+PASS (a)
+
+== (b) the first 200 customers ask again
+customers whose arm changed: 0 of 200
+PASS (b)
+
+== (c) delete the app, redeploy the identical app, ask all 1000 again
+deployments and replica states:
+  EtaModelV1   {'RUNNING': 2}
+  EtaModelV2   {'RUNNING': 1}
+  Router       {'RUNNING': 1}
+Ray CPUs: 2, booked by Serve now: 0.85 (worst case with 3 candidate replicas: 2*0.25 + 3*0.25 + 0.1 = 1.35)
+customers whose arm changed after redeploy: 0 of 1000 (incl. the 200 from (b))
+PASS (c)
+
+== (d) raise weight 0.2 -> 0.5 (router redeployed in place)
+v2 share now 0.513; moved v1->v2: 310; moved v2->v1: 0
+sample:
+customer_id  bucket w=0.2 redeploy w=0.5
+  cust-0000  0.0613    v2       v2    v2
+  cust-0001  0.0231    v2       v2    v2
+  cust-0002  0.2529    v1       v1    v2
+  cust-0003  0.4867    v1       v1    v2
+  cust-0004  0.9233    v1       v1    v1
+  cust-0005  0.1451    v2       v2    v2
+  cust-0006  0.8145    v1       v1    v1
+  cust-0007  0.0204    v2       v2    v2
+  cust-0008  0.9723    v1       v1    v1
+  cust-0009  0.0074    v2       v2    v2
+PASS (d)
+
+== (e) X-Beta: 1 on 50 requests from customers who are on v1 at weight 0.5
+with header: Counter({'v2': 50})
+same customers without header: Counter({'v1': 50})
+PASS (e)
+
+== autoscaling: weight=1.0, extra_work_ms=50, 12 clients for 25 s, then idle 45 s
+candidate replicas over time (t_s, replicas), changes only: [(0, 1), (4, 2), (28, 3), (63, 1)]
+peak 3, final 1; load stopped at t=25s
+
+ALL CHECKS PASSED
+[33m(raylet)[0m Task ServeController.graceful_shutdown failed. There are infinite retries remaining, so the task will be retried. Error: The actor is dead because it was killed by `ray.kill`.
