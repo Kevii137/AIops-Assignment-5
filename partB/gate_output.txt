@@ -1,0 +1,84 @@
+# python partB/eta_mlflow.py table
+ version     alias bundle                 algorithm   run_id
+       1      prod     v1                  Pipeline 1ba2c6c5
+       2 candidate     v2 GradientBoostingRegressor 58b5421c
+
+# python partB/eta_mlflow.py gate   (defaults: min_rel_gain=0.03, max_p95_ms=10.0, max_slice_regression=0.05)
+{
+  "criteria": {
+    "mae_gain": true,
+    "p95_latency": true,
+    "rush_slice": true,
+    "rain_slice": true
+  },
+  "promote": true,
+  "measured": {
+    "rel_mae_gain": 0.4894,
+    "cand_p95_ms": 1.305,
+    "rush_mae_change": -0.564,
+    "rain_mae_change": -0.4592
+  },
+  "thresholds": {
+    "min_rel_gain": 0.03,
+    "max_p95_ms": 10.0,
+    "max_slice_regression": 0.05
+  },
+  "prod": {
+    "mae": 11.9553,
+    "mae_rush": 19.6799,
+    "mae_rain": 11.6227,
+    "p95_ms": 1.384,
+    "n_rows": 2000,
+    "n_rush": 571,
+    "n_rain": 994
+  },
+  "candidate": {
+    "mae": 6.1049,
+    "mae_rush": 8.5795,
+    "mae_rain": 6.2853,
+    "p95_ms": 1.305,
+    "n_rows": 2000,
+    "n_rush": 571,
+    "n_rain": 994
+  }
+}
+
+# python partB/eta_mlflow.py gate --min-rel-gain 0.60
+{
+  "criteria": {
+    "mae_gain": false,
+    "p95_latency": true,
+    "rush_slice": true,
+    "rain_slice": true
+  },
+  "promote": false,
+  "measured": {
+    "rel_mae_gain": 0.4894,
+    "cand_p95_ms": 1.328,
+    "rush_mae_change": -0.564,
+    "rain_mae_change": -0.4592
+  },
+  "thresholds": {
+    "min_rel_gain": 0.6,
+    "max_p95_ms": 10.0,
+    "max_slice_regression": 0.05
+  },
+  "prod": {
+    "mae": 11.9553,
+    "mae_rush": 19.6799,
+    "mae_rain": 11.6227,
+    "p95_ms": 1.432,
+    "n_rows": 2000,
+    "n_rush": 571,
+    "n_rain": 994
+  },
+  "candidate": {
+    "mae": 6.1049,
+    "mae_rush": 8.5795,
+    "mae_rain": 6.2853,
+    "p95_ms": 1.328,
+    "n_rows": 2000,
+    "n_rush": 571,
+    "n_rain": 994
+  }
+}

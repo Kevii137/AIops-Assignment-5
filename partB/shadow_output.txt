@@ -1,0 +1,13 @@
+# servers: mlflow models serve -m models:/eta-model@prod -p 5101 / @candidate -p 5102 (--env-manager local)
+# python partB/shadow.py --alias-demo
+requests sent to each server : 200 (rows 0-199 of data/eta_fresh.csv)
+versions answering           : prod=['v1'] candidate=['v2']
+(i)   mean |prod - candidate|: 9.48 min (median 7.10, max 51.7)
+(ii)  differ by > 10 min     : 35.0% (70 of 200)
+(iii) p95 latency            : prod 6.3 ms, candidate 6.1 ms (p50 5.5 / 5.4 ms)
+MAE vs actual on these rows  : prod 11.42 min, candidate 6.11 min
+of the >10 min disagreements, candidate was closer to actual in 89%
+
+alias demo: prod -> version 1; server :5101 answers v1
+moved prod -> version 2; server :5101 still answers v1
+restored prod -> version 1
