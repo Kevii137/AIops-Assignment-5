@@ -1,7 +1,3 @@
-"""Contract tests for eta_app. Run from the repo root after `python eta_data.py`:
-
-    pytest partA -q
-"""
 import re
 import uuid
 
