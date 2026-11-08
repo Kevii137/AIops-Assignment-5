@@ -11,7 +11,7 @@ All written answers, tables, the machine description and the "not tested" list a
 |---|---|---|---|
 | A1 service | `partA/eta_app.py` | — | Part A |
 | A2 tests | `partA/test_eta_app.py` (15 cases) | `pytest partA -q` | Part A |
-| A3 load test | `load_test.py` (course file, unchanged) | `partA/loadtest_results.json` (required sweep), `partA/loadtest_results_2workers.json` | Part A, "Load test" |
+| A3 load test | `load_test.py` (course file, unchanged) | `partA/loadtest_results.json` (required sweep), `partA/loadtest_results_2workers.json`, `partA/extra_runs/` (batch, repeat, 24/32 clients, CPU-pinned runs) | Part A, "Load test" |
 | B1 registration | `partB/eta_mlflow.py` (`register`) | `partB/gate_output.txt` (registry table at the top) | Part B, table 2 |
 | B2 gate | `partB/eta_mlflow.py` (`decide`, `promotion_gate`), `partB/test_gate.py` (18 cases) | `partB/gate_output.txt` (default and `min_rel_gain=0.60`) | Part B, "Promotion gate" |
 | B3 shadow | `partB/shadow.py` | `partB/shadow_output.txt` | Part B, "Shadow comparison" |
