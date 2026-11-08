@@ -1,0 +1,81 @@
+### server: Part A, ETA_MODEL=data/eta_v1.joblib
+$ python partD/smoke_eta.py --url http://localhost:8000 --expect-version v1
+PASS  health             HTTP 200 {"status":"ok","model_version":"v1"}
+PASS  version            answered by v1, expected v1
+PASS  batch              30 predictions, range 31.2-559.8 min, order kept: True
+PASS  sanity: distance   distance [5, 20, 50, 100, 150] km -> [43.4, 82.1, 159.5, 288.4, 417.4] min
+PASS  sanity: traffic    traffic 0.1 -> 90.8 min, 0.9 -> 125.0 min
+PASS  bad input -> 422   distance_km='far' -> HTTP 422
+PASS  latency            p95 3.4 ms over 50 single-row requests (limit 80.0 ms)
+SMOKE TEST PASSED (version=v1, p95=3.4 ms)
+exit code: 0
+
+$ python partD/smoke_eta.py --url http://localhost:8000/v1/models/eta:predict --expect-version v2
+PASS  health             HTTP 200 {"status":"ok","model_version":"v1"}
+FAIL  version            answered by v1, expected v2
+PASS  batch              30 predictions, range 31.2-559.8 min, order kept: True
+PASS  sanity: distance   distance [5, 20, 50, 100, 150] km -> [43.4, 82.1, 159.5, 288.4, 417.4] min
+PASS  sanity: traffic    traffic 0.1 -> 90.8 min, 0.9 -> 125.0 min
+PASS  bad input -> 422   distance_km='far' -> HTTP 422
+PASS  latency            p95 3.1 ms over 50 single-row requests (limit 80.0 ms)
+SMOKE TEST FAILED: version
+exit code: 1
+
+$ python partD/smoke_eta.py --url http://localhost:8000 --expect-version v1 --max-p95-ms 0.5
+PASS  health             HTTP 200 {"status":"ok","model_version":"v1"}
+PASS  version            answered by v1, expected v1
+PASS  batch              30 predictions, range 31.2-559.8 min, order kept: True
+PASS  sanity: distance   distance [5, 20, 50, 100, 150] km -> [43.4, 82.1, 159.5, 288.4, 417.4] min
+PASS  sanity: traffic    traffic 0.1 -> 90.8 min, 0.9 -> 125.0 min
+PASS  bad input -> 422   distance_km='far' -> HTTP 422
+FAIL  latency            p95 8.8 ms over 50 single-row requests (limit 0.5 ms)
+SMOKE TEST FAILED: latency
+exit code: 1
+
+### server: Part A, ETA_MODEL=data/eta_v2.joblib
+$ python partD/smoke_eta.py --url http://localhost:8000 --expect-version v2
+PASS  health             HTTP 200 {"status":"ok","model_version":"v2"}
+PASS  version            answered by v2, expected v2
+PASS  batch              30 predictions, range 31.2-392.5 min, order kept: True
+PASS  sanity: distance   distance [5, 20, 50, 100, 150] km -> [51.9, 96.6, 193.7, 305.2, 404.5] min
+PASS  sanity: traffic    traffic 0.1 -> 97.9 min, 0.9 -> 157.3 min
+PASS  bad input -> 422   distance_km='far' -> HTTP 422
+PASS  latency            p95 7.9 ms over 50 single-row requests (limit 80.0 ms)
+SMOKE TEST PASSED (version=v2, p95=7.9 ms)
+exit code: 0
+
+### no server running on :8000
+$ python partD/smoke_eta.py --url http://localhost:8000 --expect-version v1
+FAIL  health             ConnectionError: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /healthz (Caused by 
+FAIL  version            ConnectionError: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /v1/models/eta:predi
+FAIL  batch              ConnectionError: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /v1/models/eta:predi
+FAIL  sanity: distance   ConnectionError: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /v1/models/eta:predi
+FAIL  sanity: traffic    ConnectionError: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /v1/models/eta:predi
+FAIL  bad input -> 422   ConnectionError: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /v1/models/eta:predi
+FAIL  latency            ConnectionError: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /v1/models/eta:predi
+SMOKE TEST FAILED: health, version, batch, sanity: distance, sanity: traffic, bad input -> 422, latency
+exit code: 1
+
+### server: Part A with a broken bundle (v1 model, distance_km and traffic_index columns swapped, version 'v1-broken')
+$ python partD/smoke_eta.py --url http://localhost:8000 --expect-version v1-broken
+PASS  health             HTTP 200 {"status":"ok","model_version":"v1-broken"}
+FAIL  version            HTTPError: 500 Server Error: Internal Server Error for url: http://localhost:8000/v1/models/eta:predict
+FAIL  batch              HTTPError: 500 Server Error: Internal Server Error for url: http://localhost:8000/v1/models/eta:predict
+FAIL  sanity: distance   HTTPError: 500 Server Error: Internal Server Error for url: http://localhost:8000/v1/models/eta:predict
+FAIL  sanity: traffic    HTTPError: 500 Server Error: Internal Server Error for url: http://localhost:8000/v1/models/eta:predict
+PASS  bad input -> 422   distance_km='far' -> HTTP 422
+FAIL  latency            HTTPError: 500 Server Error: Internal Server Error for url: http://localhost:8000/v1/models/eta:predict
+SMOKE TEST FAILED: version, batch, sanity: distance, sanity: traffic, latency
+exit code: 1
+
+### server: Part A with a model trained on data whose distance_km column was shuffled (version 'v2-bad')
+$ python partD/smoke_eta.py --url http://localhost:8000 --expect-version v2-bad
+PASS  health             HTTP 200 {"status":"ok","model_version":"v2-bad"}
+PASS  version            answered by v2-bad, expected v2-bad
+PASS  batch              30 predictions, range 62.4-117.3 min, order kept: True
+FAIL  sanity: distance   distance [5, 20, 50, 100, 150] km -> [95.0, 99.7, 94.8, 81.5, 81.5] min
+PASS  sanity: traffic    traffic 0.1 -> 74.0 min, 0.9 -> 116.1 min
+PASS  bad input -> 422   distance_km='far' -> HTTP 422
+PASS  latency            p95 3.9 ms over 50 single-row requests (limit 80.0 ms)
+SMOKE TEST FAILED: sanity: distance
+exit code: 1
