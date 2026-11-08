@@ -14,3 +14,6 @@ mlartifacts/
 *.pdf
 Assignment_Starter.zip
 Module4_Assignment_Starter/
+
+# the compiled report is part of the submission
+!REPORT.pdf
