@@ -1,12 +1,3 @@
-"""Shadow comparison: the same 200 single-row requests to prod (:5101) and candidate (:5102).
-
-    export MLFLOW_TRACKING_URI=sqlite:///mlflow.db
-    mlflow models serve -m "models:/eta-model@prod"      -p 5101 --env-manager local &
-    mlflow models serve -m "models:/eta-model@candidate" -p 5102 --env-manager local &
-    python partB/shadow.py [--alias-demo]
-
-Follows the Task B shadow-test solution in the Lecture 10 MLflow notebook.
-"""
 import argparse
 import time
 

@@ -88,12 +88,6 @@ def registry_table(client=None):
 
 
 def decide(prod, cand, min_rel_gain=0.03, max_p95_ms=10.0, max_slice_regression=0.05):
-    """Promotion verdict from two metric dicts (keys mae, mae_rush, mae_rain, p95_ms).
-
-    min_rel_gain and max_slice_regression are fractions of prod's MAE:
-    with the defaults the candidate needs >= 3 % lower overall MAE, and each
-    slice may be at most 5 % worse than prod's on that slice.
-    """
     rel_gain = (prod["mae"] - cand["mae"]) / prod["mae"]
     rush_change = (cand["mae_rush"] - prod["mae_rush"]) / prod["mae_rush"]
     rain_change = (cand["mae_rain"] - prod["mae_rain"]) / prod["mae_rain"]
@@ -119,7 +113,7 @@ def _metrics(model, fresh, features, n_timed=200):
     rush = fresh["hour"].isin(RUSH_HOURS).to_numpy()
     rain = (fresh["rain"] == 1).to_numpy()
 
-    for i in range(5):  # first calls pay one-off costs; keep them out of the timing
+    for i in range(5):  # first calls pay one-off costs, we keep them out of the timing
         model.predict(X.iloc[[i]])
     times = []
     for i in range(n_timed):

@@ -1,7 +1,3 @@
-"""Tests for decide() with made-up metrics. No MLflow server or registry needed:
-
-    pytest partB -q
-"""
 import copy
 
 import pytest
