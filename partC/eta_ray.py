@@ -1,13 +1,3 @@
-"""Ray Serve app: a sticky canary between the v1 (prod) and v2 (candidate) ETA models.
-
-    Router (ingress) --> EtaModelV1: 2 replicas, 0.25 CPU each
-                     +-> EtaModelV2: autoscaled 1..3 replicas, 0.25 CPU each
-
-POST /v1/models/eta:predict  {"customer_id": "...", "instances": [{7 features}, ...]}
-
-Deployment/router/build structure follows ray_serve_app.py from Lecture 10 (Ray Serve).
-The lecture's router picks an arm per request with random(); this one picks per customer.
-"""
 import hashlib
 import os
 import time
@@ -22,7 +12,6 @@ from ray.serve.handle import DeploymentHandle
 
 FEATURES = ["distance_km", "n_stops", "hour", "weekday", "traffic_index", "rain", "weight_kg"]
 
-# Worst case 2*0.25 + 3*0.25 + 0.1 = 1.35 CPUs, so the app fits a 2-CPU Ray.
 MODEL_CPUS = 0.25
 ROUTER_CPUS = 0.1
 CANDIDATE_AUTOSCALING = {
@@ -35,7 +24,6 @@ CANDIDATE_AUTOSCALING = {
 
 
 def bucket(customer_id: str) -> float:
-    """Map an id to [0, 1). Same id -> same value in every process and every run."""
     digest = hashlib.sha256(customer_id.encode("utf-8")).digest()
     return int.from_bytes(digest[:8], "big") / 2**64
 
@@ -111,7 +99,6 @@ class Router:
 
 
 def build(weight: float = 0.1, extra_work_ms: float = 0.0, data_dir: str = "data"):
-    """Application graph Router -> (v1, v2). `weight` is the share of customers sent to v2."""
     # absolute paths: a replica's working directory is not guaranteed to be ours
     v1_path = os.path.abspath(os.path.join(data_dir, "eta_v1.joblib"))
     v2_path = os.path.abspath(os.path.join(data_dir, "eta_v2.joblib"))

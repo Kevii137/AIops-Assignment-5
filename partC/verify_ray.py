@@ -1,9 +1,3 @@
-"""Deploy eta_ray on a 2-CPU Ray and check the sticky canary. Run from the repo root:
-
-    python partC/verify_ray.py [--autoscale] | tee partC/verify_output.txt
-
-Every check prints its evidence and then asserts; the script stops at the first failure.
-"""
 import argparse
 import collections
 import sys
@@ -39,7 +33,7 @@ def deploy(weight, extra_work_ms=0.0):
 
 
 def ask_all(sess, ids, rows, headers=None):
-    """customer_id -> arm; also checks the answering model matches the arm."""
+    # cutomer to arm mapping
     arms = {}
     for i, cid in enumerate(ids):
         r = sess.post(URL, json={"customer_id": cid, "instances": [rows[i % len(rows)]]},
@@ -103,7 +97,7 @@ def main(autoscale):
 
     print("\n== (c) delete the app, redeploy the identical app, ask all 1000 again")
     serve.delete(APP)
-    time.sleep(3)  # lecture workaround: give the controller time before redeploying
+    time.sleep(3)
     deploy(0.2)
     show_setup()
     redeployed = ask_all(sess, IDS, rows)
